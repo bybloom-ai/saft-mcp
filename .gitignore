@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing / tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# Environment
+.env
+.env.local
+
+# Lock file (uv)
+uv.lock
+
+# MCP / Claude
+.claude/
+.playwright-mcp/
+
+# SAF-T data files (real company data, never commit)
+Saft Josefinas 2025/
+*.xml
+!src/saft_mcp/schemas/*.xsd
+
+# Spec documents (local only)
+saft-mcp-prd-en.md
+saft-mcp-technical-spec.md
