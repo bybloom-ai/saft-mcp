@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
 from saft_mcp.config import settings
 from saft_mcp.parser.models import Invoice
@@ -22,7 +23,7 @@ def query_invoices(
     status: str | None = None,
     limit: int | None = None,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Query invoices with filtering and pagination.
 
     Returns an InvoiceQueryResponse-style dict.

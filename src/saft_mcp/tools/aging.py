@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
 from saft_mcp.state import SessionState
 
@@ -15,7 +16,7 @@ def aging_analysis(
     session: SessionState,
     reference_date: str | None = None,
     buckets: list[int] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Compute accounts receivable aging from invoices and payments."""
     if session.loaded_file is None:
         return {
@@ -58,11 +59,11 @@ def aging_analysis(
         if i == 0:
             bucket_labels.append(f"0-{boundary}")
         else:
-            bucket_labels.append(f"{bucket_boundaries[i-1]+1}-{boundary}")
+            bucket_labels.append(f"{bucket_boundaries[i - 1] + 1}-{boundary}")
     bucket_labels.append(f">{bucket_boundaries[-1]}")
 
     # Compute aging per customer
-    customer_aging: list[dict] = []
+    customer_aging: list[dict[str, Any]] = []
     totals_by_bucket: defaultdict[str, Decimal] = defaultdict(Decimal)
     grand_total = Decimal("0")
 

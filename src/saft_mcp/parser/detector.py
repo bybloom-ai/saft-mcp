@@ -35,8 +35,7 @@ def detect_namespace(file_path: str) -> str:
         return match.group(1).decode("utf-8")
 
     raise SaftParseError(
-        "Could not detect SAF-T namespace. "
-        "Ensure the file is a valid SAF-T PT XML."
+        "Could not detect SAF-T namespace. Ensure the file is a valid SAF-T PT XML."
     )
 
 

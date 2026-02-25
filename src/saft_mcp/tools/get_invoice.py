@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from saft_mcp.state import SessionState
 
 
-def get_invoice(session: SessionState, invoice_no: str) -> dict:
+def get_invoice(session: SessionState, invoice_no: str) -> dict[str, Any]:
     """Get full detail for a single invoice by number."""
     if session.loaded_file is None:
         return {
@@ -40,7 +42,7 @@ def get_invoice(session: SessionState, invoice_no: str) -> dict:
     # Build line detail
     lines_out = []
     for line in inv.lines:
-        line_dict: dict = {
+        line_dict: dict[str, Any] = {
             "line_number": line.line_number,
             "product_code": line.product_code,
             "product_description": line.product_description,
@@ -70,7 +72,7 @@ def get_invoice(session: SessionState, invoice_no: str) -> dict:
         lines_out.append(line_dict)
 
     # Build document totals
-    totals: dict = {
+    totals: dict[str, Any] = {
         "net_total": str(inv.document_totals.net_total),
         "tax_payable": str(inv.document_totals.tax_payable),
         "gross_total": str(inv.document_totals.gross_total),
@@ -82,7 +84,7 @@ def get_invoice(session: SessionState, invoice_no: str) -> dict:
             "exchange_rate": str(inv.document_totals.currency.exchange_rate),
         }
 
-    result: dict = {
+    result: dict[str, Any] = {
         "invoice_no": inv.invoice_no,
         "invoice_date": inv.invoice_date.isoformat(),
         "invoice_type": inv.invoice_type,

@@ -1,6 +1,5 @@
 """Tests for hash chain verification."""
 
-
 from saft_mcp.validators.hash_chain import extract_number, extract_series
 
 

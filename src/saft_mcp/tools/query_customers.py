@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from decimal import Decimal
+from typing import Any
 
 from saft_mcp.config import settings
 from saft_mcp.state import SessionState
@@ -17,7 +18,7 @@ def query_customers(
     country: str | None = None,
     limit: int | None = None,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Query customers with filtering, pagination, and revenue stats."""
     if session.loaded_file is None:
         return {

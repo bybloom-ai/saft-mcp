@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from decimal import Decimal
+from typing import Any
 
 from saft_mcp.parser.full_parser import parse_saft_file
 from saft_mcp.parser.models import SaftData
@@ -16,7 +17,7 @@ def compare_saft(
     session: SessionState,
     file_path: str,
     metrics: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Compare the loaded SAF-T file against a second file."""
     if session.loaded_file is None:
         return {
@@ -34,7 +35,7 @@ def compare_saft(
 
     data_a = session.loaded_file
     active_metrics = metrics or ALL_METRICS
-    changes: dict = {}
+    changes: dict[str, Any] = {}
 
     period_a = _period_str(data_a)
     period_b = _period_str(data_b)
@@ -72,7 +73,7 @@ def _period_str(data: SaftData) -> str:
     return f"{sd.isoformat()} to {ed.isoformat()}"
 
 
-def _revenue_totals(data: SaftData) -> dict:
+def _revenue_totals(data: SaftData) -> dict[str, Decimal]:
     revenue = Decimal("0")
     credit_notes = Decimal("0")
     for inv in data.invoices:
@@ -90,7 +91,7 @@ def _revenue_totals(data: SaftData) -> dict:
     }
 
 
-def _compare_revenue(a: SaftData, b: SaftData) -> dict:
+def _compare_revenue(a: SaftData, b: SaftData) -> dict[str, Any]:
     ra, rb = _revenue_totals(a), _revenue_totals(b)
     result = {}
     for key in ["gross_revenue", "credit_notes", "net_revenue"]:
@@ -115,7 +116,7 @@ def _customer_revenue(data: SaftData) -> dict[str, Decimal]:
     return dict(rev)
 
 
-def _compare_customers(a: SaftData, b: SaftData) -> dict:
+def _compare_customers(a: SaftData, b: SaftData) -> dict[str, Any]:
     rev_a = _customer_revenue(a)
     rev_b = _customer_revenue(b)
     ids_a, ids_b = set(rev_a.keys()), set(rev_b.keys())
@@ -148,9 +149,7 @@ def _compare_customers(a: SaftData, b: SaftData) -> dict:
                 "name": names.get(cid, cid),
                 "revenue": str(rev_b[cid].quantize(Decimal("0.01"))),
             }
-            for cid in sorted(
-                new_ids, key=lambda x: rev_b.get(x, Decimal("0")), reverse=True
-            )[:5]
+            for cid in sorted(new_ids, key=lambda x: rev_b.get(x, Decimal("0")), reverse=True)[:5]
         ],
         "top_lost": [
             {
@@ -158,9 +157,7 @@ def _compare_customers(a: SaftData, b: SaftData) -> dict:
                 "name": names.get(cid, cid),
                 "revenue": str(rev_a[cid].quantize(Decimal("0.01"))),
             }
-            for cid in sorted(
-                lost_ids, key=lambda x: rev_a.get(x, Decimal("0")), reverse=True
-            )[:5]
+            for cid in sorted(lost_ids, key=lambda x: rev_a.get(x, Decimal("0")), reverse=True)[:5]
         ],
         "top_movers": [
             {
@@ -185,7 +182,7 @@ def _product_stats(data: SaftData) -> dict[str, Decimal]:
     return dict(rev)
 
 
-def _compare_products(a: SaftData, b: SaftData) -> dict:
+def _compare_products(a: SaftData, b: SaftData) -> dict[str, Any]:
     rev_a = _product_stats(a)
     rev_b = _product_stats(b)
     codes_a, codes_b = set(rev_a.keys()), set(rev_b.keys())
@@ -207,7 +204,7 @@ def _doc_type_counts(data: SaftData) -> dict[str, int]:
     return dict(counts)
 
 
-def _compare_doc_types(a: SaftData, b: SaftData) -> dict:
+def _compare_doc_types(a: SaftData, b: SaftData) -> dict[str, Any]:
     da, db = _doc_type_counts(a), _doc_type_counts(b)
     all_types = sorted(set(da.keys()) | set(db.keys()))
     return {
@@ -233,7 +230,7 @@ def _vat_by_rate(data: SaftData) -> dict[str, Decimal]:
     return dict(totals)
 
 
-def _compare_vat(a: SaftData, b: SaftData) -> dict:
+def _compare_vat(a: SaftData, b: SaftData) -> dict[str, Any]:
     va, vb = _vat_by_rate(a), _vat_by_rate(b)
     all_rates = sorted(set(va.keys()) | set(vb.keys()), key=Decimal)
     return {

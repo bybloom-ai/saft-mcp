@@ -77,9 +77,7 @@ class TestQueryCustomers:
     def test_revenue_stats(self, loaded_session):
         result = query_customers(loaded_session, limit=500)
         # At least some customers should have revenue
-        customers_with_revenue = [
-            c for c in result["customers"] if Decimal(c["total_revenue"]) > 0
-        ]
+        customers_with_revenue = [c for c in result["customers"] if Decimal(c["total_revenue"]) > 0]
         assert len(customers_with_revenue) > 0
         # Revenue should be positive (excludes credit notes)
         for cust in customers_with_revenue:

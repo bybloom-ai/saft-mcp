@@ -91,6 +91,4 @@ class TestTaxSummary:
             tax = Decimal(entry["tax_amount"])
             gross = Decimal(entry["gross_total"])
             # gross should equal base + tax
-            assert gross == base + tax, (
-                f"For {entry['group_key']}: {base} + {tax} != {gross}"
-            )
+            assert gross == base + tax, f"For {entry['group_key']}: {base} + {tax} != {gross}"

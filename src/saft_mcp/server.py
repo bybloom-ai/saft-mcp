@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from mcp.server.fastmcp import Context, FastMCP
 
 from saft_mcp.exceptions import SaftError
-from saft_mcp.state import session_store
+from saft_mcp.state import SessionState, session_store
 from saft_mcp.tools.aging import aging_analysis
 from saft_mcp.tools.anomaly_detect import detect_anomalies
 from saft_mcp.tools.compare import compare_saft
@@ -30,7 +32,7 @@ mcp = FastMCP(
 )
 
 
-async def _get_session(ctx: Context):
+async def _get_session(ctx: Context[Any, Any]) -> SessionState:
     session_id = getattr(ctx, "session_id", "default")
     return await session_store.get(session_id)
 
@@ -41,7 +43,7 @@ async def _get_session(ctx: Context):
 
 
 @mcp.tool()
-async def saft_load(ctx: Context, file_path: str) -> dict:
+async def saft_load(ctx: Context[Any, Any], file_path: str) -> dict[str, Any]:
     """Load and parse a SAF-T PT XML file.
 
     Args:
@@ -58,9 +60,9 @@ async def saft_load(ctx: Context, file_path: str) -> dict:
 
 @mcp.tool()
 async def saft_validate(
-    ctx: Context,
+    ctx: Context[Any, Any],
     rules: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Validate the loaded SAF-T file against XSD and Portuguese business rules.
 
     Args:
@@ -74,7 +76,7 @@ async def saft_validate(
 
 
 @mcp.tool()
-async def saft_summary(ctx: Context) -> dict:
+async def saft_summary(ctx: Context[Any, Any]) -> dict[str, Any]:
     """Generate an executive summary of the loaded SAF-T file.
 
     Returns revenue totals, invoice counts, VAT breakdown, top customers,
@@ -86,7 +88,7 @@ async def saft_summary(ctx: Context) -> dict:
 
 @mcp.tool()
 async def saft_query_invoices(
-    ctx: Context,
+    ctx: Context[Any, Any],
     date_from: str | None = None,
     date_to: str | None = None,
     customer_nif: str | None = None,
@@ -97,7 +99,7 @@ async def saft_query_invoices(
     status: str | None = None,
     limit: int | None = None,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Search and filter invoices in the loaded SAF-T file.
 
     Args:
@@ -133,11 +135,11 @@ async def saft_query_invoices(
 
 @mcp.tool()
 async def saft_tax_summary(
-    ctx: Context,
+    ctx: Context[Any, Any],
     date_from: str | None = None,
     date_to: str | None = None,
     group_by: str = "rate",
-) -> dict:
+) -> dict[str, Any]:
     """Generate a VAT analysis of the loaded SAF-T file.
 
     Args:
@@ -153,14 +155,14 @@ async def saft_tax_summary(
 
 @mcp.tool()
 async def saft_query_customers(
-    ctx: Context,
+    ctx: Context[Any, Any],
     name: str | None = None,
     nif: str | None = None,
     city: str | None = None,
     country: str | None = None,
     limit: int | None = None,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Search and filter customers in the loaded SAF-T file.
 
     Args:
@@ -187,14 +189,14 @@ async def saft_query_customers(
 
 @mcp.tool()
 async def saft_query_products(
-    ctx: Context,
+    ctx: Context[Any, Any],
     description: str | None = None,
     code: str | None = None,
     product_type: str | None = None,
     group: str | None = None,
     limit: int | None = None,
     offset: int = 0,
-) -> dict:
+) -> dict[str, Any]:
     """Search and filter products in the loaded SAF-T file.
 
     Args:
@@ -221,7 +223,7 @@ async def saft_query_products(
 
 
 @mcp.tool()
-async def saft_get_invoice(ctx: Context, invoice_no: str) -> dict:
+async def saft_get_invoice(ctx: Context[Any, Any], invoice_no: str) -> dict[str, Any]:
     """Get full detail for a single invoice including all line items.
 
     Args:
@@ -236,9 +238,9 @@ async def saft_get_invoice(ctx: Context, invoice_no: str) -> dict:
 
 @mcp.tool()
 async def saft_anomaly_detect(
-    ctx: Context,
+    ctx: Context[Any, Any],
     checks: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Detect suspicious patterns in the loaded SAF-T file.
 
     Args:
@@ -254,10 +256,10 @@ async def saft_anomaly_detect(
 
 @mcp.tool()
 async def saft_compare(
-    ctx: Context,
+    ctx: Context[Any, Any],
     file_path: str,
     metrics: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Compare the loaded SAF-T file against a second file.
 
     Args:
@@ -273,10 +275,10 @@ async def saft_compare(
 
 @mcp.tool()
 async def saft_aging(
-    ctx: Context,
+    ctx: Context[Any, Any],
     reference_date: str | None = None,
     buckets: list[int] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Compute accounts receivable aging from invoices and payments.
 
     Args:
@@ -291,11 +293,11 @@ async def saft_aging(
 
 @mcp.tool()
 async def saft_export(
-    ctx: Context,
+    ctx: Context[Any, Any],
     export_type: str,
     file_path: str,
-    filters: dict | None = None,
-) -> dict:
+    filters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Export query results to a CSV file.
 
     Args:
@@ -311,10 +313,10 @@ async def saft_export(
 
 @mcp.tool()
 async def saft_stats(
-    ctx: Context,
+    ctx: Context[Any, Any],
     date_from: str | None = None,
     date_to: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Generate statistical overview of the loaded SAF-T file.
 
     Args:

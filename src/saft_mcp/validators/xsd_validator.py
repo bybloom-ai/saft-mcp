@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import cast
 
 from lxml import etree
 
@@ -25,16 +26,18 @@ def _strip_xsd11_features(xsd_doc: etree._ElementTree) -> None:
     """
     ns = {"xs": _XS_NS}
 
-    for assert_el in xsd_doc.xpath("//xs:assert", namespaces=ns):
-        assert_el.getparent().remove(assert_el)
+    for assert_el in cast(list[etree._Element], xsd_doc.xpath("//xs:assert", namespaces=ns)):
+        parent = assert_el.getparent()
+        if parent is not None:
+            parent.remove(assert_el)
 
     # xs:all with maxOccurs > 1 children is XSD 1.1 only.
     # Convert all xs:all to xs:sequence for compatibility.
-    for all_el in xsd_doc.xpath("//xs:all", namespaces=ns):
+    for all_el in cast(list[etree._Element], xsd_doc.xpath("//xs:all", namespaces=ns)):
         all_el.tag = f"{{{_XS_NS}}}sequence"
 
 
-def validate_xsd(file_path: str, namespace: str) -> list[dict]:
+def validate_xsd(file_path: str, namespace: str) -> list[dict[str, str]]:
     """Validate a SAF-T file against its XSD schema.
 
     Returns a list of error dicts with 'severity', 'rule', 'location', 'message'.
@@ -96,8 +99,8 @@ def validate_xsd(file_path: str, namespace: str) -> list[dict]:
     if is_valid:
         return []
 
-    results = []
-    for error in schema.error_log:
+    results: list[dict[str, str]] = []
+    for error in schema.error_log:  # type: ignore[attr-defined]
         results.append(
             {
                 "severity": "error",
@@ -108,12 +111,13 @@ def validate_xsd(file_path: str, namespace: str) -> list[dict]:
             }
         )
         if len(results) >= 50:
+            error_count = len(list(schema.error_log))  # type: ignore[call-overload]
             results.append(
                 {
                     "severity": "info",
                     "rule": "xsd",
                     "location": "",
-                    "message": f"Showing first 50 of {len(schema.error_log)} XSD errors",
+                    "message": f"Showing first 50 of {error_count} XSD errors",
                     "suggestion": "",
                 }
             )

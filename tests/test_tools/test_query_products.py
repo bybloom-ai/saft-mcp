@@ -94,9 +94,7 @@ class TestQueryProducts:
         all_prods = query_products(loaded_session, limit=1)
         ptype = all_prods["products"][0]["product_type"]
         desc_fragment = all_prods["products"][0]["product_description"][:3]
-        result = query_products(
-            loaded_session, product_type=ptype, description=desc_fragment
-        )
+        result = query_products(loaded_session, product_type=ptype, description=desc_fragment)
         for prod in result["products"]:
             assert prod["product_type"] == ptype
             assert desc_fragment.lower() in prod["product_description"].lower()

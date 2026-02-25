@@ -51,9 +51,7 @@ def verify_hash_chain(invoices: list[Invoice]) -> list[HashChainResult]:
 
     results = []
     for series, series_invoices in series_map.items():
-        sorted_invs = sorted(
-            series_invoices, key=lambda i: extract_number(i.invoice_no)
-        )
+        sorted_invs = sorted(series_invoices, key=lambda i: extract_number(i.invoice_no))
         issues: list[str] = []
 
         for i, inv in enumerate(sorted_invs):

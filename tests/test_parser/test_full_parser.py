@@ -106,8 +106,7 @@ class TestFullParserRealData:
 
         # Find invoices with currency info
         currency_invoices = [
-            inv for inv in data.invoices
-            if inv.document_totals.currency is not None
+            inv for inv in data.invoices if inv.document_totals.currency is not None
         ]
 
         if currency_invoices:

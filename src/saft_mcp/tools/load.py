@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import Any
 
 from saft_mcp.config import settings
 from saft_mcp.exceptions import SaftFileTooLargeError, SaftParseError
@@ -39,7 +40,7 @@ def validate_file_path(file_path: str) -> str:
     return resolved
 
 
-def load_saft(session: SessionState, file_path: str) -> dict:
+def load_saft(session: SessionState, file_path: str) -> dict[str, Any]:
     """Load a SAF-T file into the session.
 
     Returns a LoadResponse-style dict with file metadata.

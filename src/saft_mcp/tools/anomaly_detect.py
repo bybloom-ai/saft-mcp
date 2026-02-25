@@ -5,7 +5,9 @@ from __future__ import annotations
 from collections import defaultdict
 from decimal import Decimal
 from statistics import mean, stdev
+from typing import Any
 
+from saft_mcp.parser.models import SaftData
 from saft_mcp.state import SessionState
 from saft_mcp.validators.hash_chain import extract_number, extract_series
 
@@ -22,7 +24,7 @@ ALL_CHECKS = [
 def detect_anomalies(
     session: SessionState,
     checks: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Detect anomalies in the loaded SAF-T data."""
     if session.loaded_file is None:
         return {
@@ -32,7 +34,7 @@ def detect_anomalies(
 
     data = session.loaded_file
     active_checks = checks or ALL_CHECKS
-    anomalies: list[dict] = []
+    anomalies: list[dict[str, Any]] = []
 
     if "duplicate_invoices" in active_checks:
         anomalies.extend(_check_duplicates(data))
@@ -59,9 +61,9 @@ def detect_anomalies(
     }
 
 
-def _check_duplicates(data) -> list[dict]:
+def _check_duplicates(data: SaftData) -> list[dict[str, Any]]:
     """Same customer + same amount + same date."""
-    seen: defaultdict[tuple, list[str]] = defaultdict(list)
+    seen: defaultdict[tuple[str, str, str], list[str]] = defaultdict(list)
     for inv in data.invoices:
         if inv.document_status.invoice_status == "A":
             continue
@@ -71,19 +73,21 @@ def _check_duplicates(data) -> list[dict]:
     anomalies = []
     for (cust_id, amount, inv_date), inv_nos in seen.items():
         if len(inv_nos) > 1:
-            anomalies.append({
-                "type": "duplicate_invoices",
-                "severity": "warning",
-                "description": (
-                    f"{len(inv_nos)} invoices with same customer, amount ({amount}), "
-                    f"and date ({inv_date})"
-                ),
-                "affected_documents": inv_nos,
-            })
+            anomalies.append(
+                {
+                    "type": "duplicate_invoices",
+                    "severity": "warning",
+                    "description": (
+                        f"{len(inv_nos)} invoices with same customer, amount ({amount}), "
+                        f"and date ({inv_date})"
+                    ),
+                    "affected_documents": inv_nos,
+                }
+            )
     return anomalies
 
 
-def _check_numbering_gaps(data) -> list[dict]:
+def _check_numbering_gaps(data: SaftData) -> list[dict[str, Any]]:
     """Missing sequential numbers within each series."""
     series_numbers: defaultdict[str, list[int]] = defaultdict(list)
     for inv in data.invoices:
@@ -106,16 +110,18 @@ def _check_numbering_gaps(data) -> list[dict]:
                 else:
                     gaps.append(f"{gap_start}-{gap_end}")
         if gaps:
-            anomalies.append({
-                "type": "numbering_gaps",
-                "severity": "warning",
-                "description": f"Series '{series}' has gaps in numbering: {', '.join(gaps)}",
-                "affected_documents": [f"{series}/{g}" for g in gaps],
-            })
+            anomalies.append(
+                {
+                    "type": "numbering_gaps",
+                    "severity": "warning",
+                    "description": f"Series '{series}' has gaps in numbering: {', '.join(gaps)}",
+                    "affected_documents": [f"{series}/{g}" for g in gaps],
+                }
+            )
     return anomalies
 
 
-def _check_weekend_invoices(data) -> list[dict]:
+def _check_weekend_invoices(data: SaftData) -> list[dict[str, Any]]:
     """Invoices issued on Saturday (5) or Sunday (6)."""
     weekend_invoices = []
     for inv in data.invoices:
@@ -128,17 +134,19 @@ def _check_weekend_invoices(data) -> list[dict]:
     if not weekend_invoices:
         return []
 
-    return [{
-        "type": "weekend_invoices",
-        "severity": "info",
-        "description": f"{len(weekend_invoices)} invoices issued on weekends",
-        "affected_documents": [
-            f"{inv_no} ({inv_date}, {day})" for inv_no, inv_date, day in weekend_invoices
-        ],
-    }]
+    return [
+        {
+            "type": "weekend_invoices",
+            "severity": "info",
+            "description": f"{len(weekend_invoices)} invoices issued on weekends",
+            "affected_documents": [
+                f"{inv_no} ({inv_date}, {day})" for inv_no, inv_date, day in weekend_invoices
+            ],
+        }
+    ]
 
 
-def _check_unusual_amounts(data) -> list[dict]:
+def _check_unusual_amounts(data: SaftData) -> list[dict[str, Any]]:
     """Round numbers significantly above average."""
     amounts = []
     for inv in data.invoices:
@@ -165,18 +173,20 @@ def _check_unusual_amounts(data) -> list[dict]:
     if not anomalies:
         return []
 
-    return [{
-        "type": "unusual_amounts",
-        "severity": "info",
-        "description": (
-            f"{len(anomalies)} invoices with round amounts above "
-            f"3 standard deviations (threshold: {threshold:.2f})"
-        ),
-        "affected_documents": anomalies,
-    }]
+    return [
+        {
+            "type": "unusual_amounts",
+            "severity": "info",
+            "description": (
+                f"{len(anomalies)} invoices with round amounts above "
+                f"3 standard deviations (threshold: {threshold:.2f})"
+            ),
+            "affected_documents": anomalies,
+        }
+    ]
 
 
-def _check_cancelled_ratio(data) -> list[dict]:
+def _check_cancelled_ratio(data: SaftData) -> list[dict[str, Any]]:
     """High cancellation rate per series."""
     series_total: defaultdict[str, int] = defaultdict(int)
     series_cancelled: defaultdict[str, int] = defaultdict(int)
@@ -194,19 +204,21 @@ def _check_cancelled_ratio(data) -> list[dict]:
         cancelled = series_cancelled.get(series, 0)
         if total >= 5 and cancelled / total > 0.1:
             pct = cancelled / total * 100
-            anomalies.append({
-                "type": "cancelled_ratio",
-                "severity": "warning",
-                "description": (
-                    f"Series '{series}' has {pct:.1f}% cancellation rate "
-                    f"({cancelled}/{total} invoices)"
-                ),
-                "affected_documents": series_cancelled_docs[series],
-            })
+            anomalies.append(
+                {
+                    "type": "cancelled_ratio",
+                    "severity": "warning",
+                    "description": (
+                        f"Series '{series}' has {pct:.1f}% cancellation rate "
+                        f"({cancelled}/{total} invoices)"
+                    ),
+                    "affected_documents": series_cancelled_docs[series],
+                }
+            )
     return anomalies
 
 
-def _check_zero_amount(data) -> list[dict]:
+def _check_zero_amount(data: SaftData) -> list[dict[str, Any]]:
     """Invoices with gross_total of 0."""
     zero_invoices = []
     for inv in data.invoices:
@@ -218,9 +230,11 @@ def _check_zero_amount(data) -> list[dict]:
     if not zero_invoices:
         return []
 
-    return [{
-        "type": "zero_amount",
-        "severity": "warning",
-        "description": f"{len(zero_invoices)} non-cancelled invoices with zero amount",
-        "affected_documents": zero_invoices,
-    }]
+    return [
+        {
+            "type": "zero_amount",
+            "severity": "warning",
+            "description": f"{len(zero_invoices)} non-cancelled invoices with zero amount",
+            "affected_documents": zero_invoices,
+        }
+    ]

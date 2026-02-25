@@ -6,6 +6,7 @@ from collections import defaultdict
 from datetime import date
 from decimal import Decimal
 from statistics import mean, median, stdev
+from typing import Any
 
 from saft_mcp.state import SessionState
 
@@ -14,7 +15,7 @@ def compute_stats(
     session: SessionState,
     date_from: str | None = None,
     date_to: str | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Compute statistical overview of the loaded SAF-T data."""
     if session.loaded_file is None:
         return {
@@ -91,8 +92,7 @@ def compute_stats(
     # Weekday distribution
     weekday_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     weekday_dist = [
-        {"weekday": weekday_names[i], "count": weekday_counts.get(i, 0)}
-        for i in range(7)
+        {"weekday": weekday_names[i], "count": weekday_counts.get(i, 0)} for i in range(7)
     ]
 
     # Monthly distribution
@@ -121,7 +121,7 @@ def compute_stats(
     # Build customer name lookup for top/bottom
     cust_names = {c.customer_id: c.company_name for c in data.customers}
 
-    result: dict = {
+    result: dict[str, Any] = {
         "invoice_stats": {
             "count": len(amounts),
             "mean": round(avg, 2),

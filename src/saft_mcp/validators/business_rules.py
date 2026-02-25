@@ -33,7 +33,7 @@ class ValidationResult:
         self.message = message
         self.suggestion = suggestion
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str]:
         return {
             "severity": self.severity,
             "rule": self.rule,
@@ -52,7 +52,9 @@ def validate_nifs(data: SaftData) -> list[ValidationResult]:
     if not valid:
         results.append(
             ValidationResult(
-                "error", "nif", "Header/TaxRegistrationNumber",
+                "error",
+                "nif",
+                "Header/TaxRegistrationNumber",
                 f"Company NIF {data.metadata.tax_registration_number} is invalid: {info}",
                 "Check the company NIF in the invoicing software settings.",
             )
@@ -64,7 +66,8 @@ def validate_nifs(data: SaftData) -> list[ValidationResult]:
         if not valid:
             results.append(
                 ValidationResult(
-                    "warning", "nif",
+                    "warning",
+                    "nif",
                     f"Customer/{cust.customer_id}",
                     f"Customer {cust.company_name} has invalid NIF {cust.customer_tax_id}: {info}",
                 )
@@ -90,7 +93,8 @@ def validate_numbering(data: SaftData) -> list[ValidationResult]:
             if curr_num != prev_num + 1:
                 results.append(
                     ValidationResult(
-                        "error", "numbering",
+                        "error",
+                        "numbering",
                         f"SalesInvoices/Invoice/{sorted_invs[i].invoice_no}",
                         f"Numbering gap in series {series}: "
                         f"{sorted_invs[i - 1].invoice_no} -> {sorted_invs[i].invoice_no}",
@@ -113,7 +117,8 @@ def validate_atcud(data: SaftData) -> list[ValidationResult]:
         if not inv.atcud:
             results.append(
                 ValidationResult(
-                    severity, "atcud",
+                    severity,
+                    "atcud",
                     f"SalesInvoices/Invoice/{inv.invoice_no}",
                     f"Missing ATCUD on {inv.invoice_no}",
                     "ATCUD is mandatory since January 2023.",
@@ -122,7 +127,8 @@ def validate_atcud(data: SaftData) -> list[ValidationResult]:
         elif not _ATCUD_RE.match(inv.atcud):
             results.append(
                 ValidationResult(
-                    "warning", "atcud",
+                    "warning",
+                    "atcud",
                     f"SalesInvoices/Invoice/{inv.invoice_no}",
                     f"ATCUD format invalid on {inv.invoice_no}: {inv.atcud}",
                     "Expected format: XXXXXXXX-N (8 alphanumeric chars, dash, sequential number).",
@@ -141,7 +147,8 @@ def validate_tax_codes(data: SaftData) -> list[ValidationResult]:
             if line.tax.tax_code not in VALID_TAX_CODES:
                 results.append(
                     ValidationResult(
-                        "warning", "tax_codes",
+                        "warning",
+                        "tax_codes",
                         f"Invoice/{inv.invoice_no}/Line/{line.line_number}",
                         f"Unknown tax code '{line.tax.tax_code}' on line {line.line_number}",
                     )
@@ -150,7 +157,8 @@ def validate_tax_codes(data: SaftData) -> list[ValidationResult]:
             if line.tax.tax_code == "ISE" and not line.tax_exemption_reason:
                 results.append(
                     ValidationResult(
-                        "error", "tax_codes",
+                        "error",
+                        "tax_codes",
                         f"Invoice/{inv.invoice_no}/Line/{line.line_number}",
                         f"Tax-exempt line missing TaxExemptionReason on "
                         f"{inv.invoice_no} line {line.line_number}",
@@ -172,7 +180,8 @@ def validate_control_totals(data: SaftData) -> list[ValidationResult]:
         if expected_count != actual_count:
             results.append(
                 ValidationResult(
-                    "error", "control_totals",
+                    "error",
+                    "control_totals",
                     "SalesInvoices/NumberOfEntries",
                     f"SalesInvoices declares {expected_count} entries "
                     f"but file contains {actual_count}",
@@ -185,7 +194,8 @@ def validate_control_totals(data: SaftData) -> list[ValidationResult]:
         if expected_count != actual_count:
             results.append(
                 ValidationResult(
-                    "error", "control_totals",
+                    "error",
+                    "control_totals",
                     "Payments/NumberOfEntries",
                     f"Payments declares {expected_count} entries but file contains {actual_count}",
                 )

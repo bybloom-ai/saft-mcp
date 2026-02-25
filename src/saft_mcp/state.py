@@ -58,9 +58,7 @@ class SessionStore:
     def _evict_expired(self) -> None:
         now = time.monotonic()
         expired = [
-            sid
-            for sid, s in self._sessions.items()
-            if now - s.last_accessed > self._timeout
+            sid for sid, s in self._sessions.items() if now - s.last_accessed > self._timeout
         ]
         for sid in expired:
             del self._sessions[sid]

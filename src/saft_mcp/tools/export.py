@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import csv
 from pathlib import Path
+from typing import Any
 
 from saft_mcp.state import SessionState
 from saft_mcp.tools.anomaly_detect import detect_anomalies
@@ -19,8 +20,8 @@ def export_csv(
     session: SessionState,
     export_type: str,
     file_path: str,
-    filters: dict | None = None,
-) -> dict:
+    filters: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     """Export query results to a CSV file."""
     if session.loaded_file is None:
         return {
@@ -50,7 +51,7 @@ def export_csv(
     return {"error": "Unknown export type"}
 
 
-def _write_csv(file_path: str, columns: list[str], rows: list[dict]) -> dict:
+def _write_csv(file_path: str, columns: list[str], rows: list[dict[str, Any]]) -> dict[str, Any]:
     path = Path(file_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -65,19 +66,34 @@ def _write_csv(file_path: str, columns: list[str], rows: list[dict]) -> dict:
     }
 
 
-def _export_invoices(session: SessionState, file_path: str, filters: dict) -> dict:
+def _export_invoices(
+    session: SessionState,
+    file_path: str,
+    filters: dict[str, Any],
+) -> dict[str, Any]:
     result = query_invoices(session, limit=500, **filters)
     if "error" in result:
         return result
     columns = [
-        "invoice_no", "invoice_date", "invoice_type", "customer_id",
-        "customer_name", "net_total", "tax_payable", "gross_total",
-        "status", "line_count",
+        "invoice_no",
+        "invoice_date",
+        "invoice_type",
+        "customer_id",
+        "customer_name",
+        "net_total",
+        "tax_payable",
+        "gross_total",
+        "status",
+        "line_count",
     ]
     return _write_csv(file_path, columns, result["invoices"])
 
 
-def _export_customers(session: SessionState, file_path: str, filters: dict) -> dict:
+def _export_customers(
+    session: SessionState,
+    file_path: str,
+    filters: dict[str, Any],
+) -> dict[str, Any]:
     result = query_customers(session, limit=500, **filters)
     if "error" in result:
         return result
@@ -92,48 +108,78 @@ def _export_customers(session: SessionState, file_path: str, filters: dict) -> d
         row["country"] = addr.get("country", "")
         rows.append(row)
     columns = [
-        "customer_id", "customer_tax_id", "company_name",
-        "address_detail", "city", "postal_code", "country",
-        "self_billing_indicator", "invoice_count", "total_revenue",
+        "customer_id",
+        "customer_tax_id",
+        "company_name",
+        "address_detail",
+        "city",
+        "postal_code",
+        "country",
+        "self_billing_indicator",
+        "invoice_count",
+        "total_revenue",
     ]
     return _write_csv(file_path, columns, rows)
 
 
-def _export_products(session: SessionState, file_path: str, filters: dict) -> dict:
+def _export_products(
+    session: SessionState,
+    file_path: str,
+    filters: dict[str, Any],
+) -> dict[str, Any]:
     result = query_products(session, limit=500, **filters)
     if "error" in result:
         return result
     columns = [
-        "product_code", "product_description", "product_type",
-        "product_group", "product_number_code",
-        "times_sold", "total_quantity", "total_revenue",
+        "product_code",
+        "product_description",
+        "product_type",
+        "product_group",
+        "product_number_code",
+        "times_sold",
+        "total_quantity",
+        "total_revenue",
     ]
     return _write_csv(file_path, columns, result["products"])
 
 
-def _export_tax_summary(session: SessionState, file_path: str, filters: dict) -> dict:
+def _export_tax_summary(
+    session: SessionState,
+    file_path: str,
+    filters: dict[str, Any],
+) -> dict[str, Any]:
     result = tax_summary(session, **filters)
     if "error" in result:
         return result
     columns = [
-        "group_key", "tax_percentage", "taxable_base",
-        "tax_amount", "gross_total", "invoice_count",
+        "group_key",
+        "tax_percentage",
+        "taxable_base",
+        "tax_amount",
+        "gross_total",
+        "invoice_count",
     ]
     return _write_csv(file_path, columns, result["entries"])
 
 
-def _export_anomalies(session: SessionState, file_path: str, filters: dict) -> dict:
+def _export_anomalies(
+    session: SessionState,
+    file_path: str,
+    filters: dict[str, Any],
+) -> dict[str, Any]:
     checks = filters.get("checks")
     result = detect_anomalies(session, checks=checks)
     if "error" in result:
         return result
     rows = []
     for a in result["anomalies"]:
-        rows.append({
-            "type": a["type"],
-            "severity": a["severity"],
-            "description": a["description"],
-            "affected_documents": "; ".join(a["affected_documents"]),
-        })
+        rows.append(
+            {
+                "type": a["type"],
+                "severity": a["severity"],
+                "description": a["description"],
+                "affected_documents": "; ".join(a["affected_documents"]),
+            }
+        )
     columns = ["type", "severity", "description", "affected_documents"]
     return _write_csv(file_path, columns, rows)

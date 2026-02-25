@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
+from typing import Any
 
 from saft_mcp.state import SessionState
 
@@ -14,7 +15,7 @@ def tax_summary(
     date_from: str | None = None,
     date_to: str | None = None,
     group_by: str = "rate",
-) -> dict:
+) -> dict[str, Any]:
     """Generate a VAT summary grouped by rate, month, or doc_type.
 
     Returns a TaxSummaryResponse-style dict.
@@ -31,7 +32,7 @@ def tax_summary(
     dt = date.fromisoformat(date_to) if date_to else None
 
     # group_key -> {tax_percentage, taxable_base, tax_amount, gross_total, invoice_count}
-    groups: defaultdict[str, dict] = defaultdict(
+    groups: defaultdict[str, dict[str, Any]] = defaultdict(
         lambda: {
             "tax_percentage": Decimal("0"),
             "taxable_base": Decimal("0"),
@@ -92,19 +93,21 @@ def tax_summary(
     entries = []
     for key in sorted(groups.keys()):
         g = groups[key]
-        entries.append({
-            "group_key": key,
-            "tax_percentage": str(g["tax_percentage"]),
-            "taxable_base": str(g["taxable_base"].quantize(Decimal("0.01"))),
-            "tax_amount": str(g["tax_amount"].quantize(Decimal("0.01"))),
-            "gross_total": str(g["gross_total"].quantize(Decimal("0.01"))),
-            "invoice_count": g["invoice_count"],
-        })
+        entries.append(
+            {
+                "group_key": key,
+                "tax_percentage": str(g["tax_percentage"]),
+                "taxable_base": str(g["taxable_base"].quantize(Decimal("0.01"))),
+                "tax_amount": str(g["tax_amount"].quantize(Decimal("0.01"))),
+                "gross_total": str(g["gross_total"].quantize(Decimal("0.01"))),
+                "invoice_count": g["invoice_count"],
+            }
+        )
 
     # Totals
-    total_base = sum(Decimal(e["taxable_base"]) for e in entries)
-    total_tax = sum(Decimal(e["tax_amount"]) for e in entries)
-    total_gross = sum(Decimal(e["gross_total"]) for e in entries)
+    total_base = sum((Decimal(e["taxable_base"]) for e in entries), Decimal("0"))
+    total_tax = sum((Decimal(e["tax_amount"]) for e in entries), Decimal("0"))
+    total_gross = sum((Decimal(e["gross_total"]) for e in entries), Decimal("0"))
     total_count = sum(e["invoice_count"] for e in entries)
 
     # Period

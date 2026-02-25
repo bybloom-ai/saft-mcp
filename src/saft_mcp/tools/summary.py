@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from collections import Counter, defaultdict
 from decimal import Decimal
+from typing import Any
 
 from saft_mcp.state import SessionState
 
 
-def summarize_saft(session: SessionState) -> dict:
+def summarize_saft(session: SessionState) -> dict[str, Any]:
     """Generate a summary of the loaded SAF-T file.
 
     Returns a SummaryResponse-style dict.

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from saft_mcp.parser.detector import detect_namespace
 from saft_mcp.state import SessionState
 from saft_mcp.validators.business_rules import (
@@ -16,7 +18,7 @@ ALL_RULES = {"xsd", "numbering", "hash_chain", "control_totals", "nif", "tax_cod
 def validate_saft(
     session: SessionState,
     rules: list[str] | None = None,
-) -> dict:
+) -> dict[str, Any]:
     """Validate the loaded SAF-T file.
 
     Args:
@@ -33,7 +35,7 @@ def validate_saft(
         }
 
     requested_rules = set(rules) if rules else ALL_RULES
-    all_results: list[dict] = []
+    all_results: list[dict[str, Any]] = []
 
     # XSD validation (runs against the file on disk)
     if "xsd" in requested_rules:
@@ -55,13 +57,15 @@ def validate_saft(
         for cr in chain_results:
             if not cr.chain_intact:
                 for issue in cr.issues:
-                    all_results.append({
-                        "severity": "error",
-                        "rule": "hash_chain",
-                        "location": f"Series {cr.series}",
-                        "message": issue,
-                        "suggestion": "",
-                    })
+                    all_results.append(
+                        {
+                            "severity": "error",
+                            "rule": "hash_chain",
+                            "location": f"Series {cr.series}",
+                            "message": issue,
+                            "suggestion": "",
+                        }
+                    )
 
     error_count = sum(1 for r in all_results if r["severity"] == "error")
     warning_count = sum(1 for r in all_results if r["severity"] == "warning")

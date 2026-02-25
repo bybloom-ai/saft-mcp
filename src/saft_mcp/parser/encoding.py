@@ -42,8 +42,7 @@ def detect_encoding(file_path: str) -> str:
     result = chardet.detect(header)
     if result["encoding"] is None:
         raise SaftEncodingError(
-            "Could not detect file encoding. "
-            "Ensure the file is a valid XML document."
+            "Could not detect file encoding. Ensure the file is a valid XML document."
         )
 
     return _normalize_encoding(result["encoding"])

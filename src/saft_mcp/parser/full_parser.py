@@ -255,7 +255,9 @@ def _parse_line_tax(elem: etree._Element, ns: str) -> LineTax:
     tax_elem = _find(elem, "Tax", ns)
     if tax_elem is None:
         return LineTax(
-            tax_type="IVA", tax_country_region="PT", tax_code="NOR",
+            tax_type="IVA",
+            tax_country_region="PT",
+            tax_code="NOR",
             tax_percentage=Decimal("0"),
         )
     return LineTax(
@@ -270,7 +272,9 @@ def _parse_document_totals(elem: etree._Element, ns: str) -> DocumentTotals:
     dt = _find(elem, "DocumentTotals", ns)
     if dt is None:
         return DocumentTotals(
-            tax_payable=Decimal("0"), net_total=Decimal("0"), gross_total=Decimal("0"),
+            tax_payable=Decimal("0"),
+            net_total=Decimal("0"),
+            gross_total=Decimal("0"),
         )
     currency = None
     curr_elem = _find(dt, "Currency", ns)
@@ -335,8 +339,7 @@ def _parse_invoice(elem: etree._Element, ns: str) -> Invoice:
     status_elem = _find(elem, "DocumentStatus", ns)
     status = DocumentStatus(
         invoice_status=_t(status_elem, "InvoiceStatus", ns),
-        invoice_status_date=_datetime(status_elem, "InvoiceStatusDate", ns)
-        or datetime(2000, 1, 1),
+        invoice_status_date=_datetime(status_elem, "InvoiceStatusDate", ns) or datetime(2000, 1, 1),
         reason=_t(status_elem, "Reason", ns),
         source_id=_t(status_elem, "SourceID", ns),
         source_billing=_t(status_elem, "SourceBilling", ns),
@@ -423,8 +426,7 @@ def _parse_payment(elem: etree._Element, ns: str) -> Payment:
     status_elem = _find(elem, "DocumentStatus", ns)
     status = PaymentStatus(
         payment_status=_t(status_elem, "PaymentStatus", ns),
-        payment_status_date=_datetime(status_elem, "PaymentStatusDate", ns)
-        or datetime(2000, 1, 1),
+        payment_status_date=_datetime(status_elem, "PaymentStatusDate", ns) or datetime(2000, 1, 1),
         reason=_t(status_elem, "Reason", ns),
         source_id=_t(status_elem, "SourceID", ns),
         source_payment=_t(status_elem, "SourcePayment", ns),
