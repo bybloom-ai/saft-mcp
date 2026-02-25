@@ -10,7 +10,7 @@
 
 [Instalação](#instalação) &#183; [Ferramentas](#ferramentas-disponíveis) &#183; [Configuração](#configuração)
 
-*[English version](README.md)*
+*[English version](README.md)* &#183; *13 ferramentas &#183; 152 testes*
 
 </div>
 
@@ -181,14 +181,143 @@ Devolve base tributável, valor de IVA e total bruto por grupo, mais totais glob
 
 ---
 
+### `saft_query_customers`
+
+Pesquisar e filtrar dados mestres de clientes com enriquecimento de faturação.
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `name` | string | - | Nome da empresa (case-insensitive, parcial) |
+| `nif` | string | - | NIF (correspondência parcial) |
+| `city` | string | - | Cidade de faturação (case-insensitive, parcial) |
+| `country` | string | - | Código de país (exato, ex: "PT", "ES") |
+| `limit` | integer | 50 | Resultados por página (max 500) |
+| `offset` | integer | 0 | Offset de paginação |
+
+Devolve clientes com contagem de faturas e faturação total por cliente.
+
+---
+
+### `saft_query_products`
+
+Pesquisar e filtrar o catálogo de produtos com estatísticas de vendas.
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `description` | string | - | Descrição do produto (case-insensitive, parcial) |
+| `code` | string | - | Código do produto (correspondência parcial) |
+| `product_type` | string | - | P (produto), S (serviço), O (outro), I (importação), E (exportação) |
+| `group` | string | - | Grupo de produto (case-insensitive, parcial) |
+| `limit` | integer | 50 | Resultados por página (max 500) |
+| `offset` | integer | 0 | Offset de paginação |
+
+Devolve produtos com vezes vendido, quantidade total e faturação total.
+
+---
+
+### `saft_get_invoice`
+
+Obter detalhe completo de uma fatura incluindo todas as linhas.
+
+| Parâmetro | Tipo | Descrição |
+|-----------|------|-----------|
+| `invoice_no` | string | Número exato da fatura (ex: "FR 2025A15/90") |
+
+Devolve fatura completa com cabeçalho, totais do documento, regimes especiais e todas as linhas com produto, quantidade, preço, imposto, isenções e referências.
+
+---
+
+### `saft_anomaly_detect`
+
+Detetar padrões suspeitos e irregularidades no ficheiro carregado.
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `checks` | list[string] | todas | Verificações específicas a executar |
+
+Verificações disponíveis:
+
+| Verificação | O que deteta |
+|-------------|-------------|
+| `duplicate_invoices` | Combinações iguais de cliente + valor + data |
+| `numbering_gaps` | Números sequenciais em falta dentro de cada série |
+| `weekend_invoices` | Faturas emitidas ao sábado ou domingo |
+| `unusual_amounts` | Valores > 3 desvios-padrão da média |
+| `cancelled_ratio` | Taxas elevadas de anulação por série |
+| `zero_amount` | Faturas com total bruto zero |
+
+Devolve anomalias com tipo, severidade, descrição e documentos afetados.
+
+---
+
+### `saft_compare`
+
+Comparar o ficheiro SAF-T carregado com um segundo ficheiro (ex: mês a mês, ano a ano).
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `file_path` | string | - | Caminho para o segundo ficheiro SAF-T XML |
+| `metrics` | list[string] | todas | Métricas a comparar |
+
+Métricas disponíveis: `revenue`, `customers`, `products`, `doc_types`, `vat`.
+
+Devolve etiquetas de período e um dicionário de alterações com antes/depois/delta por métrica. Inclui top novos/perdidos clientes, maiores variações e percentagens.
+
+---
+
+### `saft_aging`
+
+Calcular antiguidade de saldos (contas a receber) a partir de faturas e pagamentos.
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `reference_date` | string | hoje | Data de referência (YYYY-MM-DD) |
+| `buckets` | list[int] | [30,60,90,120] | Limites dos escalões em dias |
+
+Devolve antiguidade por cliente com valores em cada escalão, ordenado por total em dívida. Usa alocação FIFO de pagamentos contra faturas.
+
+---
+
+### `saft_export`
+
+Exportar dados para ficheiros CSV para uso em folhas de cálculo ou outras ferramentas.
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `export_type` | string | - | `invoices`, `customers`, `products`, `tax_summary` ou `anomalies` |
+| `file_path` | string | - | Caminho do ficheiro CSV de saída |
+| `filters` | dict | - | Filtros opcionais (mesmos da ferramenta de consulta correspondente) |
+
+Devolve caminho do ficheiro, contagem de linhas e nomes das colunas.
+
+---
+
+### `saft_stats`
+
+Gerar uma visão estatística dos dados de faturação.
+
+| Parâmetro | Tipo | Default | Descrição |
+|-----------|------|---------|-----------|
+| `date_from` | string | - | Data início (YYYY-MM-DD) |
+| `date_to` | string | - | Data fim (YYYY-MM-DD) |
+
+Devolve estatísticas de faturas (média, mediana, desvio-padrão), distribuições diárias/semanais/mensais, concentração de clientes (análise de Pareto) e faturas com maior e menor valor.
+
+---
+
 ## Fluxo Típico
 
 ```
-1. saft_load       -> Carregar e analisar o ficheiro XML
-2. saft_validate   -> Verificar conformidade (XSD + regras de negócio)
-3. saft_summary    -> Visão geral (faturação, top clientes, IVA)
-4. saft_query_invoices -> Consultar faturas específicas
-5. saft_tax_summary    -> Análise de IVA por taxa, mês ou tipo
+1. saft_load            -> Carregar e analisar o ficheiro XML
+2. saft_validate        -> Verificar conformidade (XSD + regras de negócio)
+3. saft_summary         -> Visão geral (faturação, top clientes, IVA)
+4. saft_query_invoices  -> Consultar faturas específicas
+5. saft_get_invoice     -> Detalhe completo de uma fatura
+6. saft_tax_summary     -> Análise de IVA por taxa, mês ou tipo
+7. saft_anomaly_detect  -> Detetar padrões suspeitos
+8. saft_stats           -> Distribuições e tendências estatísticas
+9. saft_compare         -> Comparar com outro ficheiro SAF-T
+10. saft_export         -> Exportar resultados para CSV
 ```
 
 Exemplos de perguntas após carregar um ficheiro:
@@ -199,6 +328,10 @@ Exemplos de perguntas após carregar um ficheiro:
 - "Há algum erro de validação neste ficheiro?"
 - "Lista as faturas do cliente XPTO no 3.º trimestre"
 - "Que percentagem da faturação vem dos 5 maiores clientes?"
+- "Há padrões suspeitos ou anomalias?"
+- "Compara este ficheiro com o SAF-T do mês passado"
+- "Qual é a antiguidade de saldos?"
+- "Exporta todas as faturas para CSV"
 
 ---
 
@@ -238,11 +371,19 @@ Assistente IA (Claude, Cursor, etc.)
 |    models.py     Modelos Pydantic        |
 |                                          |
 |  tools/                                  |
-|    load.py       saft_load               |
-|    validate.py   saft_validate           |
-|    summary.py    saft_summary            |
+|    load.py            saft_load          |
+|    validate.py        saft_validate      |
+|    summary.py         saft_summary       |
 |    query_invoices.py  saft_query_invoices|
+|    query_customers.py saft_query_customer|
+|    query_products.py  saft_query_products|
+|    get_invoice.py     saft_get_invoice   |
 |    tax_summary.py     saft_tax_summary   |
+|    anomaly_detect.py  saft_anomaly_detect|
+|    compare.py         saft_compare       |
+|    aging.py           saft_aging         |
+|    export.py          saft_export        |
+|    stats.py           saft_stats         |
 |                                          |
 |  validators/                             |
 |    xsd_validator.py   XSD 1.04_01        |
@@ -271,7 +412,7 @@ Decisões de design:
 # Instalar com dependências de desenvolvimento
 uv sync --extra dev
 
-# Correr testes (82 testes)
+# Correr testes (152 testes)
 pytest
 
 # Lint
@@ -288,12 +429,15 @@ mypy src/
 
 ## Roadmap
 
+- [x] `saft_query_customers` -- pesquisar e filtrar dados de clientes
+- [x] `saft_query_products` -- pesquisar e filtrar catálogo de produtos
+- [x] `saft_get_invoice` -- detalhe completo de fatura com linhas
+- [x] `saft_anomaly_detect` -- detetar faturas duplicadas, falhas na numeração, valores atípicos
+- [x] `saft_compare` -- comparar dois ficheiros SAF-T (ex: mês a mês)
+- [x] `saft_aging` -- análise de antiguidade de saldos (contas a receber)
+- [x] `saft_export` -- exportar dados para CSV
+- [x] `saft_stats` -- visão estatística e distribuições
 - [ ] **Streaming parser** para ficheiros grandes (>= 50 MB)
-- [ ] `saft_query_customers` -- pesquisar e filtrar dados de clientes
-- [ ] `saft_query_products` -- pesquisar e filtrar catálogo de produtos
-- [ ] `saft_anomaly_detect` -- detetar faturas duplicadas, falhas na numeração, valores atípicos
-- [ ] `saft_compare` -- comparar dois ficheiros SAF-T (ex: mês a mês)
-- [ ] `saft_aging` -- análise de antiguidade de saldos (contas a receber)
 - [ ] Suporte para SAF-T de Contabilidade (lançamentos, razão geral, balancete)
 - [ ] `saft_trial_balance` -- gerar balancete a partir dos dados contabilísticos
 - [ ] `saft_ies_prepare` -- pré-preencher campos da IES (declaração anual)

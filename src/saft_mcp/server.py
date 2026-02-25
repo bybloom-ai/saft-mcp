@@ -6,11 +6,16 @@ from mcp.server.fastmcp import Context, FastMCP
 
 from saft_mcp.exceptions import SaftError
 from saft_mcp.state import session_store
+from saft_mcp.tools.aging import aging_analysis
+from saft_mcp.tools.anomaly_detect import detect_anomalies
+from saft_mcp.tools.compare import compare_saft
+from saft_mcp.tools.export import export_csv
 from saft_mcp.tools.get_invoice import get_invoice
 from saft_mcp.tools.load import load_saft
 from saft_mcp.tools.query_customers import query_customers
 from saft_mcp.tools.query_invoices import query_invoices
 from saft_mcp.tools.query_products import query_products
+from saft_mcp.tools.stats import compute_stats
 from saft_mcp.tools.summary import summarize_saft
 from saft_mcp.tools.tax_summary import tax_summary
 from saft_mcp.tools.validate import validate_saft
@@ -227,3 +232,97 @@ async def saft_get_invoice(ctx: Context, invoice_no: str) -> dict:
     """
     session = await _get_session(ctx)
     return get_invoice(session, invoice_no=invoice_no)
+
+
+@mcp.tool()
+async def saft_anomaly_detect(
+    ctx: Context,
+    checks: list[str] | None = None,
+) -> dict:
+    """Detect suspicious patterns in the loaded SAF-T file.
+
+    Args:
+        checks: Specific checks to run. Defaults to all. Available checks:
+                duplicate_invoices, numbering_gaps, weekend_invoices,
+                unusual_amounts, cancelled_ratio, zero_amount.
+
+    Returns list of anomalies with type, severity, description, and affected documents.
+    """
+    session = await _get_session(ctx)
+    return detect_anomalies(session, checks=checks)
+
+
+@mcp.tool()
+async def saft_compare(
+    ctx: Context,
+    file_path: str,
+    metrics: list[str] | None = None,
+) -> dict:
+    """Compare the loaded SAF-T file against a second file.
+
+    Args:
+        file_path: Path to the second SAF-T XML file to compare against.
+        metrics: Specific metrics to compare. Defaults to all. Available:
+                 revenue, customers, products, doc_types, vat.
+
+    Returns period labels and a changes dict with before/after/delta per metric.
+    """
+    session = await _get_session(ctx)
+    return compare_saft(session, file_path=file_path, metrics=metrics)
+
+
+@mcp.tool()
+async def saft_aging(
+    ctx: Context,
+    reference_date: str | None = None,
+    buckets: list[int] | None = None,
+) -> dict:
+    """Compute accounts receivable aging from invoices and payments.
+
+    Args:
+        reference_date: Date to age from (ISO format YYYY-MM-DD). Defaults to today.
+        buckets: Aging bucket boundaries in days. Defaults to [30, 60, 90, 120].
+
+    Returns per-customer aging with amounts in each bucket, sorted by outstanding amount.
+    """
+    session = await _get_session(ctx)
+    return aging_analysis(session, reference_date=reference_date, buckets=buckets)
+
+
+@mcp.tool()
+async def saft_export(
+    ctx: Context,
+    export_type: str,
+    file_path: str,
+    filters: dict | None = None,
+) -> dict:
+    """Export query results to a CSV file.
+
+    Args:
+        export_type: What to export: invoices, customers, products, tax_summary, anomalies.
+        file_path: Output CSV file path.
+        filters: Optional filters (same as the corresponding query tool parameters).
+
+    Returns file path, row count, and column names.
+    """
+    session = await _get_session(ctx)
+    return export_csv(session, export_type=export_type, file_path=file_path, filters=filters)
+
+
+@mcp.tool()
+async def saft_stats(
+    ctx: Context,
+    date_from: str | None = None,
+    date_to: str | None = None,
+) -> dict:
+    """Generate statistical overview of the loaded SAF-T file.
+
+    Args:
+        date_from: Start date filter (ISO format YYYY-MM-DD).
+        date_to: End date filter (ISO format YYYY-MM-DD).
+
+    Returns invoice statistics (mean, median, std deviation), daily/weekly/monthly
+    distributions, customer concentration (Pareto), and top/bottom invoices.
+    """
+    session = await _get_session(ctx)
+    return compute_stats(session, date_from=date_from, date_to=date_to)

@@ -1,6 +1,6 @@
 # SAF-T MCP Server
 
-MCP server for parsing and analyzing Portuguese SAF-T (Standard Audit File for Tax Purposes) XML files. Pre-implementation phase -- specs are written, code is not.
+MCP server for parsing and analyzing Portuguese SAF-T (Standard Audit File for Tax Purposes) XML files. Fully implemented with 13 tools and 152 tests.
 
 ## Documents
 
@@ -24,24 +24,36 @@ Located in `Saft Josefinas 2025/`. These are real exports from PHC Corporate for
 - Python 3.11+, FastMCP (MCP SDK), lxml, Pydantic v2, pydantic-settings, chardet
 - Dev: pytest, pytest-asyncio, ruff, mypy
 
-## Project Structure (planned)
+## Project Structure
 
 ```
 src/saft_mcp/
-  server.py          # FastMCP entry point
+  server.py          # FastMCP entry point, registers all 13 tools
   config.py          # SaftMcpSettings (pydantic-settings)
   state.py           # SessionStore, SessionState
   exceptions.py      # SaftError hierarchy
   parser/
     detector.py      # Namespace detection, file type
     full_parser.py   # DOM parse (< 50 MB)
-    stream_parser.py # iterparse (>= 50 MB)
     encoding.py      # BOM stripping, charset detection
     models.py        # All Pydantic models
-  tools/             # One file per tool (load.py, validate.py, etc.)
+  tools/
+    load.py          # saft_load
+    validate.py      # saft_validate
+    summary.py       # saft_summary
+    query_invoices.py # saft_query_invoices
+    query_customers.py # saft_query_customers
+    query_products.py # saft_query_products
+    get_invoice.py   # saft_get_invoice
+    tax_summary.py   # saft_tax_summary
+    anomaly_detect.py # saft_anomaly_detect
+    compare.py       # saft_compare
+    aging.py         # saft_aging
+    export.py        # saft_export
+    stats.py         # saft_stats
   validators/        # xsd_validator.py, business_rules.py, hash_chain.py, nif.py
   schemas/           # XSD files (saftpt1.04_01.xsd)
-tests/               # Mirrors src/ structure
+tests/               # Mirrors src/ structure (152 tests)
 ```
 
 ## Domain Terms
@@ -77,9 +89,11 @@ tests/               # Mirrors src/ structure
 - **Namespace detection**: read first 4 KB, regex for `urn:OECD:StandardAuditFile-Tax:PT_*`. Never hardcode.
 - **Invoice numbers**: always split on last `/` to get series and sequential number. Format varies by vendor.
 
-## MVP Scope (v0.1)
+## Implemented Tools (13)
 
-5 tools: `saft_load`, `saft_validate`, `saft_summary`, `saft_query_invoices`, `saft_tax_summary`
+**Core (v0.1):** `saft_load`, `saft_validate`, `saft_summary`, `saft_query_invoices`, `saft_tax_summary`
+**Query:** `saft_query_customers`, `saft_query_products`, `saft_get_invoice`
+**Analysis:** `saft_anomaly_detect`, `saft_compare`, `saft_aging`, `saft_export`, `saft_stats`
 
 ## Code Style
 

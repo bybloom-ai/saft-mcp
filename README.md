@@ -10,7 +10,7 @@
 
 [Getting Started](#quick-start) &#183; [Available Tools](#available-tools) &#183; [Configuration](#configuration)
 
-*[Versao em Portugues](README.pt.md)*
+*[Versao em Portugues](README.pt.md)* &#183; *13 tools &#183; 152 tests*
 
 </div>
 
@@ -181,14 +181,143 @@ Returns taxable base, VAT amount, and gross total per group, plus overall totals
 
 ---
 
+### `saft_query_customers`
+
+Search and filter customer master data with revenue enrichment.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | string | - | Company name (case-insensitive, partial) |
+| `nif` | string | - | Tax ID (partial match) |
+| `city` | string | - | Billing city (case-insensitive, partial) |
+| `country` | string | - | Country code (exact, e.g. "PT", "ES") |
+| `limit` | integer | 50 | Results per page (max 500) |
+| `offset` | integer | 0 | Pagination offset |
+
+Returns customers with invoice count and total revenue per customer.
+
+---
+
+### `saft_query_products`
+
+Search and filter the product catalog with sales statistics.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `description` | string | - | Product description (case-insensitive, partial) |
+| `code` | string | - | Product code (partial match) |
+| `product_type` | string | - | P (product), S (service), O (other), I (import), E (export) |
+| `group` | string | - | Product group (case-insensitive, partial) |
+| `limit` | integer | 50 | Results per page (max 500) |
+| `offset` | integer | 0 | Pagination offset |
+
+Returns products with times sold, total quantity, and total revenue.
+
+---
+
+### `saft_get_invoice`
+
+Get full detail for a single invoice including all line items.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `invoice_no` | string | Exact invoice number (e.g. "FR 2025A15/90") |
+
+Returns complete invoice with header, document totals, special regimes, and all lines with product, quantity, price, tax, exemptions, and references.
+
+---
+
+### `saft_anomaly_detect`
+
+Detect suspicious patterns and irregularities in the loaded file.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `checks` | list[string] | all | Specific checks to run |
+
+Available checks:
+
+| Check | What it detects |
+|-------|----------------|
+| `duplicate_invoices` | Same customer + amount + date combinations |
+| `numbering_gaps` | Missing sequential numbers within each series |
+| `weekend_invoices` | Invoices issued on Saturdays or Sundays |
+| `unusual_amounts` | Invoice amounts > 3 standard deviations from the mean |
+| `cancelled_ratio` | High cancellation rates per series |
+| `zero_amount` | Invoices with zero gross total |
+
+Returns anomalies with type, severity, description, and affected documents.
+
+---
+
+### `saft_compare`
+
+Compare the loaded SAF-T file against a second file (e.g. month-over-month, year-over-year).
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `file_path` | string | - | Path to the second SAF-T XML file |
+| `metrics` | list[string] | all | Metrics to compare |
+
+Available metrics: `revenue`, `customers`, `products`, `doc_types`, `vat`.
+
+Returns period labels and a changes dict with before/after/delta per metric. Includes top new/lost customers, top movers, and percentage changes.
+
+---
+
+### `saft_aging`
+
+Compute accounts receivable aging from invoices and payments.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `reference_date` | string | today | Date to age from (YYYY-MM-DD) |
+| `buckets` | list[int] | [30,60,90,120] | Aging bucket boundaries in days |
+
+Returns per-customer aging with amounts in each bucket, sorted by total outstanding. Uses FIFO allocation of payments against invoices.
+
+---
+
+### `saft_export`
+
+Export data to CSV files for use in spreadsheets or other tools.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `export_type` | string | - | `invoices`, `customers`, `products`, `tax_summary`, or `anomalies` |
+| `file_path` | string | - | Output CSV file path |
+| `filters` | dict | - | Optional filters (same as corresponding query tool) |
+
+Returns file path, row count, and column names.
+
+---
+
+### `saft_stats`
+
+Generate a statistical overview of invoicing data.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `date_from` | string | - | Start date (YYYY-MM-DD) |
+| `date_to` | string | - | End date (YYYY-MM-DD) |
+
+Returns invoice statistics (mean, median, std deviation), daily/weekly/monthly distributions, customer concentration (Pareto analysis), and top/bottom invoices.
+
+---
+
 ## Typical Workflow
 
 ```
-1. saft_load       -> Parse the XML file
-2. saft_validate   -> Check compliance (XSD + business rules)
-3. saft_summary    -> Get the big picture (revenue, top customers, VAT)
-4. saft_query_invoices -> Drill into specific invoices
-5. saft_tax_summary    -> VAT analysis by rate, month, or doc type
+1. saft_load            -> Parse the XML file
+2. saft_validate        -> Check compliance (XSD + business rules)
+3. saft_summary         -> Get the big picture (revenue, top customers, VAT)
+4. saft_query_invoices  -> Drill into specific invoices
+5. saft_get_invoice     -> Full detail for a single invoice
+6. saft_tax_summary     -> VAT analysis by rate, month, or doc type
+7. saft_anomaly_detect  -> Flag suspicious patterns
+8. saft_stats           -> Statistical distributions and trends
+9. saft_compare         -> Diff against another SAF-T file
+10. saft_export         -> Export results to CSV
 ```
 
 Example questions you can ask after loading a file:
@@ -199,6 +328,10 @@ Example questions you can ask after loading a file:
 - "Are there any validation errors in this file?"
 - "List invoices for customer XPTO in Q3"
 - "What percentage of revenue comes from the top 5 customers?"
+- "Are there any suspicious patterns or anomalies?"
+- "Compare this file against last month's SAF-T"
+- "What's the accounts receivable aging?"
+- "Export all invoices to CSV"
 
 ---
 
@@ -238,11 +371,19 @@ AI Assistant (Claude, Cursor, etc.)
 |    models.py     Pydantic data models    |
 |                                          |
 |  tools/                                  |
-|    load.py       saft_load               |
-|    validate.py   saft_validate           |
-|    summary.py    saft_summary            |
+|    load.py            saft_load          |
+|    validate.py        saft_validate      |
+|    summary.py         saft_summary       |
 |    query_invoices.py  saft_query_invoices|
+|    query_customers.py saft_query_customer|
+|    query_products.py  saft_query_products|
+|    get_invoice.py     saft_get_invoice   |
 |    tax_summary.py     saft_tax_summary   |
+|    anomaly_detect.py  saft_anomaly_detect|
+|    compare.py         saft_compare       |
+|    aging.py           saft_aging         |
+|    export.py          saft_export        |
+|    stats.py           saft_stats         |
 |                                          |
 |  validators/                             |
 |    xsd_validator.py   XSD 1.04_01        |
@@ -271,7 +412,7 @@ Key design decisions:
 # Install with dev dependencies
 uv sync --extra dev
 
-# Run tests (82 tests)
+# Run tests (152 tests)
 pytest
 
 # Lint
@@ -305,12 +446,15 @@ saft-mcp/
 
 ## Roadmap
 
+- [x] `saft_query_customers` -- search and filter customer master data
+- [x] `saft_query_products` -- search and filter product catalog
+- [x] `saft_get_invoice` -- full invoice detail with line items
+- [x] `saft_anomaly_detect` -- flag duplicate invoices, numbering gaps, unusual amounts
+- [x] `saft_compare` -- diff two SAF-T files (e.g. month-over-month)
+- [x] `saft_aging` -- accounts receivable aging analysis
+- [x] `saft_export` -- export data to CSV
+- [x] `saft_stats` -- statistical overview and distributions
 - [ ] **Streaming parser** for large files (>= 50 MB)
-- [ ] `saft_query_customers` -- search and filter customer master data
-- [ ] `saft_query_products` -- search and filter product catalog
-- [ ] `saft_anomaly_detect` -- flag duplicate invoices, numbering gaps, unusual amounts
-- [ ] `saft_compare` -- diff two SAF-T files (e.g. month-over-month)
-- [ ] `saft_aging` -- accounts receivable aging analysis
 - [ ] Accounting SAF-T support (journal entries, general ledger, trial balance)
 - [ ] `saft_trial_balance` -- generate trial balance from accounting data
 - [ ] `saft_ies_prepare` -- pre-fill IES annual tax return fields
