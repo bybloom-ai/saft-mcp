@@ -4,7 +4,9 @@
 
 **Analise ficheiros SAF-T portugueses com assistentes de IA**
 
+[![PyPI](https://img.shields.io/pypi/v/saft-mcp?style=flat-square)](https://pypi.org/project/saft-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/bybloom-ai/saft-mcp/ci.yml?style=flat-square&label=CI)](https://github.com/bybloom-ai/saft-mcp/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![SAF-T PT 1.04_01](https://img.shields.io/badge/SAF--T%20PT-1.04__01-green?style=flat-square)](https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/SAFT_PT/Paginas/news-saf-t-702.aspx)
 
@@ -31,7 +33,13 @@ O SAF-T PT é um ficheiro XML obrigatório que todas as empresas portuguesas dev
 - **Python 3.11+** e [uv](https://docs.astral.sh/uv/) (recomendado) ou pip
 - Um **ficheiro SAF-T PT XML** exportado de qualquer software de faturação/contabilidade português (PHC, Sage, Primavera, etc.)
 
-### 1. Clonar e instalar
+### 1. Instalar
+
+```bash
+pip install saft-mcp
+```
+
+Ou a partir do source:
 
 ```bash
 git clone https://github.com/bybloom-ai/saft-mcp.git
@@ -442,8 +450,8 @@ mypy src/
 - [ ] `saft_trial_balance` -- gerar balancete a partir dos dados contabilísticos
 - [ ] `saft_ies_prepare` -- pré-preencher campos da IES (declaração anual)
 - [ ] `saft_cross_check` -- cruzamento entre SAF-T de faturação e contabilidade
-- [ ] Pacote PyPI (`pip install saft-mcp`)
-- [ ] GitHub Actions CI (pytest + ruff + mypy)
+- [x] Pacote PyPI (`pip install saft-mcp`)
+- [x] GitHub Actions CI (pytest + ruff + mypy)
 
 ---
 

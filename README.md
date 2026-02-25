@@ -4,7 +4,9 @@
 
 **Parse and analyze Portuguese SAF-T tax files with AI assistants**
 
+[![PyPI](https://img.shields.io/pypi/v/saft-mcp?style=flat-square)](https://pypi.org/project/saft-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![CI](https://img.shields.io/github/actions/workflow/status/bybloom-ai/saft-mcp/ci.yml?style=flat-square&label=CI)](https://github.com/bybloom-ai/saft-mcp/actions/workflows/ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![SAF-T PT 1.04_01](https://img.shields.io/badge/SAF--T%20PT-1.04__01-green?style=flat-square)](https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/SAFT_PT/Paginas/news-saf-t-702.aspx)
 
@@ -31,7 +33,13 @@ SAF-T PT is a mandatory XML file that all Portuguese companies must be able to e
 - **Python 3.11+** and [uv](https://docs.astral.sh/uv/) (recommended) or pip
 - A **SAF-T PT XML file** exported from any Portuguese billing/accounting software (PHC, Sage, Primavera, etc.)
 
-### 1. Clone and install
+### 1. Install
+
+```bash
+pip install saft-mcp
+```
+
+Or from source:
 
 ```bash
 git clone https://github.com/bybloom-ai/saft-mcp.git
@@ -459,8 +467,8 @@ saft-mcp/
 - [ ] `saft_trial_balance` -- generate trial balance from accounting data
 - [ ] `saft_ies_prepare` -- pre-fill IES annual tax return fields
 - [ ] `saft_cross_check` -- cross-reference invoicing vs accounting SAF-T
-- [ ] PyPI package (`pip install saft-mcp`)
-- [ ] GitHub Actions CI (pytest + ruff + mypy)
+- [x] PyPI package (`pip install saft-mcp`)
+- [x] GitHub Actions CI (pytest + ruff + mypy)
 
 ---
 
