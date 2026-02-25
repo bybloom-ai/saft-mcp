@@ -6,8 +6,11 @@ from mcp.server.fastmcp import Context, FastMCP
 
 from saft_mcp.exceptions import SaftError
 from saft_mcp.state import session_store
+from saft_mcp.tools.get_invoice import get_invoice
 from saft_mcp.tools.load import load_saft
+from saft_mcp.tools.query_customers import query_customers
 from saft_mcp.tools.query_invoices import query_invoices
+from saft_mcp.tools.query_products import query_products
 from saft_mcp.tools.summary import summarize_saft
 from saft_mcp.tools.tax_summary import tax_summary
 from saft_mcp.tools.validate import validate_saft
@@ -141,3 +144,86 @@ async def saft_tax_summary(
     """
     session = await _get_session(ctx)
     return tax_summary(session, date_from=date_from, date_to=date_to, group_by=group_by)
+
+
+@mcp.tool()
+async def saft_query_customers(
+    ctx: Context,
+    name: str | None = None,
+    nif: str | None = None,
+    city: str | None = None,
+    country: str | None = None,
+    limit: int | None = None,
+    offset: int = 0,
+) -> dict:
+    """Search and filter customers in the loaded SAF-T file.
+
+    Args:
+        name: Filter by company name (case-insensitive partial match).
+        nif: Filter by customer tax ID (partial match).
+        city: Filter by billing address city (case-insensitive partial match).
+        country: Filter by country code (exact match, e.g. "PT", "ES").
+        limit: Max results per page (default 50, max 500).
+        offset: Pagination offset.
+
+    Returns paginated list of customers with revenue stats.
+    """
+    session = await _get_session(ctx)
+    return query_customers(
+        session,
+        name=name,
+        nif=nif,
+        city=city,
+        country=country,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@mcp.tool()
+async def saft_query_products(
+    ctx: Context,
+    description: str | None = None,
+    code: str | None = None,
+    product_type: str | None = None,
+    group: str | None = None,
+    limit: int | None = None,
+    offset: int = 0,
+) -> dict:
+    """Search and filter products in the loaded SAF-T file.
+
+    Args:
+        description: Filter by product description (case-insensitive partial match).
+        code: Filter by product code (partial match).
+        product_type: Filter by type: P (product), S (service), O (other),
+                      I (import), E (export).
+        group: Filter by product group (case-insensitive partial match).
+        limit: Max results per page (default 50, max 500).
+        offset: Pagination offset.
+
+    Returns paginated list of products with sales stats.
+    """
+    session = await _get_session(ctx)
+    return query_products(
+        session,
+        description=description,
+        code=code,
+        product_type=product_type,
+        group=group,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@mcp.tool()
+async def saft_get_invoice(ctx: Context, invoice_no: str) -> dict:
+    """Get full detail for a single invoice including all line items.
+
+    Args:
+        invoice_no: Exact invoice number (e.g. "FR 2025A15/90").
+
+    Returns complete invoice with header, document totals, special regimes,
+    and all line items with product, quantity, price, tax, and references.
+    """
+    session = await _get_session(ctx)
+    return get_invoice(session, invoice_no=invoice_no)
