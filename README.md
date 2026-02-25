@@ -303,6 +303,23 @@ saft-mcp/
 
 ---
 
+## Roadmap
+
+- [ ] **Streaming parser** for large files (>= 50 MB)
+- [ ] `saft_query_customers` -- search and filter customer master data
+- [ ] `saft_query_products` -- search and filter product catalog
+- [ ] `saft_anomaly_detect` -- flag duplicate invoices, numbering gaps, unusual amounts
+- [ ] `saft_compare` -- diff two SAF-T files (e.g. month-over-month)
+- [ ] `saft_aging` -- accounts receivable aging analysis
+- [ ] Accounting SAF-T support (journal entries, general ledger, trial balance)
+- [ ] `saft_trial_balance` -- generate trial balance from accounting data
+- [ ] `saft_ies_prepare` -- pre-fill IES annual tax return fields
+- [ ] `saft_cross_check` -- cross-reference invoicing vs accounting SAF-T
+- [ ] PyPI package (`pip install saft-mcp`)
+- [ ] GitHub Actions CI (pytest + ruff + mypy)
+
+---
+
 ## Supported SAF-T versions
 
 - **SAF-T PT 1.04_01** (current Portuguese standard)

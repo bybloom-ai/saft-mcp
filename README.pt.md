@@ -8,7 +8,7 @@
 [![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![SAF-T PT 1.04_01](https://img.shields.io/badge/SAF--T%20PT-1.04__01-green?style=flat-square)](https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/SAFT_PT/Paginas/news-saf-t-702.aspx)
 
-[Instalacao](#instalacao) &#183; [Ferramentas](#ferramentas-disponiveis) &#183; [Configuracao](#configuracao)
+[Instalação](#instalação) &#183; [Ferramentas](#ferramentas-disponíveis) &#183; [Configuração](#configuração)
 
 *[English version](README.md)*
 
@@ -16,20 +16,20 @@
 
 ---
 
-Um servidor **Model Context Protocol (MCP)** que permite a assistentes de IA como Claude, Cursor e Windsurf carregar, validar e analisar ficheiros [SAF-T](https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/SAFT_PT/Paginas/default.aspx) (Standard Audit File for Tax Purposes) portugueses. Carregue um ficheiro SAF-T e consulte faturas, obtenha resumos de faturacao, analises de IVA e valide a conformidade com as regras fiscais portuguesas.
+Um servidor **Model Context Protocol (MCP)** que permite a assistentes de IA como Claude, Cursor e Windsurf carregar, validar e analisar ficheiros [SAF-T](https://info.portaldasfinancas.gov.pt/pt/apoio_contribuinte/SAFT_PT/Paginas/default.aspx) (Standard Audit File for Tax Purposes) portugueses. Carregue um ficheiro SAF-T e consulte faturas, obtenha resumos de faturação, análises de IVA e valide a conformidade com as regras fiscais portuguesas.
 
-### O que e o SAF-T PT?
+### O que é o SAF-T PT?
 
-O SAF-T PT e um ficheiro XML obrigatorio que todas as empresas portuguesas devem conseguir exportar do seu software de contabilidade/faturacao. Contem as faturas, pagamentos, clientes, produtos, registos de impostos e mais. Este servidor MCP transforma esse XML numa fonte de dados consultavel por assistentes de IA.
+O SAF-T PT é um ficheiro XML obrigatório que todas as empresas portuguesas devem conseguir exportar do seu software de contabilidade/faturação. Contém as faturas, pagamentos, clientes, produtos, registos de impostos e mais. Este servidor MCP transforma esse XML numa fonte de dados consultável por assistentes de IA.
 
 ---
 
-## Instalacao
+## Instalação
 
-### Pre-requisitos
+### Pré-requisitos
 
 - **Python 3.11+** e [uv](https://docs.astral.sh/uv/) (recomendado) ou pip
-- Um **ficheiro SAF-T PT XML** exportado de qualquer software de faturacao/contabilidade portugues (PHC, Sage, Primavera, etc.)
+- Um **ficheiro SAF-T PT XML** exportado de qualquer software de faturação/contabilidade português (PHC, Sage, Primavera, etc.)
 
 ### 1. Clonar e instalar
 
@@ -69,7 +69,7 @@ Adicionar a `~/Library/Application Support/Claude/claude_desktop_config.json` (m
 <details>
 <summary><strong>Cursor / VS Code / Outros clientes MCP</strong></summary>
 
-Adicionar a configuracao do cliente MCP:
+Adicionar à configuração do cliente MCP:
 
 ```json
 {
@@ -83,142 +83,142 @@ Adicionar a configuracao do cliente MCP:
 ```
 </details>
 
-### 3. Comecar a usar
+### 3. Começar a usar
 
 Pergunte ao assistente de IA:
 
-> "Carrega o meu ficheiro SAF-T em ~/Documents/saft_2025.xml e da-me um resumo da faturacao"
+> "Carrega o meu ficheiro SAF-T em ~/Documents/saft_2025.xml e dá-me um resumo da faturação"
 
 O servidor analisa o ficheiro, extrai todas as faturas e dados fiscais, e disponibiliza-os para consulta em linguagem natural.
 
 ---
 
-## Ferramentas Disponiveis
+## Ferramentas Disponíveis
 
 ### `saft_load`
 
 Carrega e analisa um ficheiro SAF-T PT XML. Deve ser chamado primeiro, antes de qualquer outra ferramenta.
 
-| Parametro | Tipo | Descricao |
+| Parâmetro | Tipo | Descrição |
 |-----------|------|-----------|
 | `file_path` | string | Caminho para o ficheiro SAF-T XML |
 
-Devolve nome da empresa, NIF, periodo fiscal, versao SAF-T e contagens de registos (clientes, produtos, faturas, pagamentos).
+Devolve nome da empresa, NIF, período fiscal, versão SAF-T e contagens de registos (clientes, produtos, faturas, pagamentos).
 
-Suporta encodings Windows-1252 e UTF-8, stripping de BOM e detecao automatica de namespace. Ficheiros ate 50 MB sao analisados com DOM completo; ficheiros maiores usam streaming.
+Suporta encodings Windows-1252 e UTF-8, stripping de BOM e deteção automática de namespace. Ficheiros até 50 MB são analisados com DOM completo; ficheiros maiores usam streaming.
 
 ---
 
 ### `saft_validate`
 
-Valida o ficheiro carregado contra o schema XSD oficial e regras de negocio portuguesas.
+Valida o ficheiro carregado contra o schema XSD oficial e regras de negócio portuguesas.
 
-| Parametro | Tipo | Default | Descricao |
+| Parâmetro | Tipo | Default | Descrição |
 |-----------|------|---------|-----------|
-| `rules` | list[string] | todas | Regras especificas a verificar |
+| `rules` | list[string] | todas | Regras específicas a verificar |
 
-Regras disponiveis:
+Regras disponíveis:
 
 | Regra | O que valida |
 |-------|-------------|
 | `xsd` | Estrutura XML contra o schema XSD SAF-T PT 1.04_01 |
-| `numbering` | Numeracao sequencial de faturas dentro de cada serie |
-| `nif` | Digito de controlo mod-11 do NIF |
-| `tax_codes` | Taxas de imposto correspondem as taxas de IVA portuguesas |
-| `atcud` | Codigos ATCUD presentes e bem formados |
-| `hash_chain` | Continuidade de hash entre sequencias de faturas |
+| `numbering` | Numeração sequencial de faturas dentro de cada série |
+| `nif` | Dígito de controlo mod-11 do NIF |
+| `tax_codes` | Taxas de imposto correspondem às taxas de IVA portuguesas |
+| `atcud` | Códigos ATCUD presentes e bem formados |
+| `hash_chain` | Continuidade de hash entre sequências de faturas |
 | `control_totals` | Totais calculados correspondem aos totais de controlo declarados |
 
-Devolve resultados com severidade (erro/aviso), localizacao e sugestoes de correcao.
+Devolve resultados com severidade (erro/aviso), localização e sugestões de correção.
 
 ---
 
 ### `saft_summary`
 
-Gera um resumo executivo do ficheiro carregado. Sem parametros.
+Gera um resumo executivo do ficheiro carregado. Sem parâmetros.
 
 Devolve:
-- Totais de faturacao (bruto, notas de credito, liquido)
-- Contagem de faturas e notas de credito
-- Distribuicao de IVA por taxa
-- Top 10 clientes por faturacao
-- Distribuicao por tipo de documento (FT, FR, NC, ND, FS)
+- Totais de faturação (bruto, notas de crédito, líquido)
+- Contagem de faturas e notas de crédito
+- Distribuição de IVA por taxa
+- Top 10 clientes por faturação
+- Distribuição por tipo de documento (FT, FR, NC, ND, FS)
 
 ---
 
 ### `saft_query_invoices`
 
-Pesquisa e filtra faturas com paginacao.
+Pesquisa e filtra faturas com paginação.
 
-| Parametro | Tipo | Default | Descricao |
+| Parâmetro | Tipo | Default | Descrição |
 |-----------|------|---------|-----------|
-| `date_from` | string | - | Data inicio (YYYY-MM-DD) |
+| `date_from` | string | - | Data início (YYYY-MM-DD) |
 | `date_to` | string | - | Data fim (YYYY-MM-DD) |
-| `customer_nif` | string | - | Filtrar por NIF (correspondencia parcial) |
+| `customer_nif` | string | - | Filtrar por NIF (correspondência parcial) |
 | `customer_name` | string | - | Filtrar por nome (case-insensitive, parcial) |
 | `doc_type` | string | - | FT, FR, NC, ND ou FS |
-| `min_amount` | number | - | Total bruto minimo |
-| `max_amount` | number | - | Total bruto maximo |
+| `min_amount` | number | - | Total bruto mínimo |
+| `max_amount` | number | - | Total bruto máximo |
 | `status` | string | - | N (normal), A (anulada), F (faturada) |
-| `limit` | integer | 50 | Resultados por pagina (max 500) |
-| `offset` | integer | 0 | Offset de paginacao |
+| `limit` | integer | 50 | Resultados por página (max 500) |
+| `offset` | integer | 0 | Offset de paginação |
 
-Devolve faturas com numero de documento, data, tipo, cliente, valores, estado e numero de linhas.
+Devolve faturas com número de documento, data, tipo, cliente, valores, estado e número de linhas.
 
 ---
 
 ### `saft_tax_summary`
 
-Gera uma analise de IVA agrupada por taxa, mes ou tipo de documento.
+Gera uma análise de IVA agrupada por taxa, mês ou tipo de documento.
 
-| Parametro | Tipo | Default | Descricao |
+| Parâmetro | Tipo | Default | Descrição |
 |-----------|------|---------|-----------|
-| `date_from` | string | - | Data inicio (YYYY-MM-DD) |
+| `date_from` | string | - | Data início (YYYY-MM-DD) |
 | `date_to` | string | - | Data fim (YYYY-MM-DD) |
-| `group_by` | string | `rate` | Agrupar por `rate` (taxa), `month` (mes) ou `doc_type` (tipo doc.) |
+| `group_by` | string | `rate` | Agrupar por `rate` (taxa), `month` (mês) ou `doc_type` (tipo doc.) |
 
-Devolve base tributavel, valor de IVA e total bruto por grupo, mais totais globais.
+Devolve base tributável, valor de IVA e total bruto por grupo, mais totais globais.
 
 ---
 
-## Fluxo Tipico
+## Fluxo Típico
 
 ```
 1. saft_load       -> Carregar e analisar o ficheiro XML
-2. saft_validate   -> Verificar conformidade (XSD + regras de negocio)
-3. saft_summary    -> Visao geral (faturacao, top clientes, IVA)
-4. saft_query_invoices -> Consultar faturas especificas
-5. saft_tax_summary    -> Analise de IVA por taxa, mes ou tipo
+2. saft_validate   -> Verificar conformidade (XSD + regras de negócio)
+3. saft_summary    -> Visão geral (faturação, top clientes, IVA)
+4. saft_query_invoices -> Consultar faturas específicas
+5. saft_tax_summary    -> Análise de IVA por taxa, mês ou tipo
 ```
 
-Exemplos de perguntas apos carregar um ficheiro:
+Exemplos de perguntas após carregar um ficheiro:
 
-- "Qual foi a faturacao total da empresa este ano?"
-- "Mostra-me todas as notas de credito acima de 500 euros"
-- "Qual e a distribuicao mensal do IVA?"
-- "Ha algum erro de validacao neste ficheiro?"
-- "Lista as faturas do cliente XPTO no 3o trimestre"
-- "Que percentagem da faturacao vem dos 5 maiores clientes?"
+- "Qual foi a faturação total da empresa este ano?"
+- "Mostra-me todas as notas de crédito acima de 500 euros"
+- "Qual é a distribuição mensal do IVA?"
+- "Há algum erro de validação neste ficheiro?"
+- "Lista as faturas do cliente XPTO no 3.º trimestre"
+- "Que percentagem da faturação vem dos 5 maiores clientes?"
 
 ---
 
-## Configuracao
+## Configuração
 
-Todas as definicoes sao configuraveis por variaveis de ambiente com o prefixo `SAFT_MCP_`:
+Todas as definições são configuráveis por variáveis de ambiente com o prefixo `SAFT_MCP_`:
 
-| Variavel | Default | Descricao |
+| Variável | Default | Descrição |
 |----------|---------|-----------|
 | `SAFT_MCP_STREAMING_THRESHOLD_BYTES` | 52428800 (50 MB) | Ficheiros acima deste valor usam streaming |
-| `SAFT_MCP_MAX_FILE_SIZE_BYTES` | 524288000 (500 MB) | Tamanho maximo de ficheiro aceite |
-| `SAFT_MCP_SESSION_TIMEOUT_SECONDS` | 1800 (30 min) | Expiracao de sessao apos inatividade |
-| `SAFT_MCP_MAX_CONCURRENT_SESSIONS` | 5 | Maximo de ficheiros carregados em simultaneo |
-| `SAFT_MCP_DEFAULT_QUERY_LIMIT` | 50 | Resultados por pagina por defeito |
-| `SAFT_MCP_MAX_QUERY_LIMIT` | 500 | Maximo de resultados por pagina |
-| `SAFT_MCP_LOG_LEVEL` | INFO | Nivel de logging |
+| `SAFT_MCP_MAX_FILE_SIZE_BYTES` | 524288000 (500 MB) | Tamanho máximo de ficheiro aceite |
+| `SAFT_MCP_SESSION_TIMEOUT_SECONDS` | 1800 (30 min) | Expiração de sessão após inatividade |
+| `SAFT_MCP_MAX_CONCURRENT_SESSIONS` | 5 | Máximo de ficheiros carregados em simultâneo |
+| `SAFT_MCP_DEFAULT_QUERY_LIMIT` | 50 | Resultados por página por defeito |
+| `SAFT_MCP_MAX_QUERY_LIMIT` | 500 | Máximo de resultados por página |
+| `SAFT_MCP_LOG_LEVEL` | INFO | Nível de logging |
 
 ---
 
-## Arquitectura
+## Arquitetura
 
 ```
 Assistente IA (Claude, Cursor, etc.)
@@ -229,10 +229,10 @@ Assistente IA (Claude, Cursor, etc.)
 |           servidor saft-mcp              |
 |                                          |
 |  server.py       Ponto de entrada        |
-|  state.py        Gestao de sessoes       |
+|  state.py        Gestão de sessões       |
 |                                          |
 |  parser/                                 |
-|    detector.py   Detecao de namespace    |
+|    detector.py   Deteção de namespace    |
 |    encoding.py   Tratamento de charset   |
 |    full_parser.py   Parse DOM (< 50 MB)  |
 |    models.py     Modelos Pydantic        |
@@ -246,7 +246,7 @@ Assistente IA (Claude, Cursor, etc.)
 |                                          |
 |  validators/                             |
 |    xsd_validator.py   XSD 1.04_01        |
-|    business_rules.py  Numeracao, totais  |
+|    business_rules.py  Numeração, totais  |
 |    nif.py             NIF mod-11         |
 |    hash_chain.py      Continuidade hash  |
 |                                          |
@@ -255,20 +255,20 @@ Assistente IA (Claude, Cursor, etc.)
 +------------------------------------------+
 ```
 
-Decisoes de design:
+Decisões de design:
 
-- **Todos os valores monetarios usam `Decimal`** para evitar erros de arredondamento em calculos fiscais
-- **lxml** para parsing XML, com stripping automatico de funcionalidades XSD 1.1 (o XSD oficial portugues usa `xs:assert` e `xs:all` com filhos unbounded, que o motor XSD 1.0 do lxml nao suporta nativamente)
-- **Modelos Pydantic v2** validados contra exportacoes reais do PHC Corporate
-- **Detecao automatica de namespace** lendo os primeiros 4 KB do ficheiro (nunca hardcoded)
-- **Encoding Windows-1252** tratado nativamente pela declaracao XML
+- **Todos os valores monetários usam `Decimal`** para evitar erros de arredondamento em cálculos fiscais
+- **lxml** para parsing XML, com stripping automático de funcionalidades XSD 1.1 (o XSD oficial português usa `xs:assert` e `xs:all` com filhos unbounded, que o motor XSD 1.0 do lxml não suporta nativamente)
+- **Modelos Pydantic v2** validados contra exportações reais do PHC Corporate
+- **Deteção automática de namespace** lendo os primeiros 4 KB do ficheiro (nunca hardcoded)
+- **Encoding Windows-1252** tratado nativamente pela declaração XML
 
 ---
 
 ## Desenvolvimento
 
 ```bash
-# Instalar com dependencias de desenvolvimento
+# Instalar com dependências de desenvolvimento
 uv sync --extra dev
 
 # Correr testes (82 testes)
@@ -280,24 +280,41 @@ ruff check src/ tests/
 # Formatar
 ruff format src/ tests/
 
-# Verificacao de tipos
+# Verificação de tipos
 mypy src/
 ```
 
 ---
 
-## Versoes SAF-T suportadas
+## Roadmap
 
-- **SAF-T PT 1.04_01** (norma portuguesa atual)
-
-Testado com exportacoes reais do PHC Corporate. Deve funcionar com ficheiros SAF-T de qualquer software portugues compativel (Sage, Primavera, PHC, Moloni, InvoiceXpress, etc.).
+- [ ] **Streaming parser** para ficheiros grandes (>= 50 MB)
+- [ ] `saft_query_customers` -- pesquisar e filtrar dados de clientes
+- [ ] `saft_query_products` -- pesquisar e filtrar catálogo de produtos
+- [ ] `saft_anomaly_detect` -- detetar faturas duplicadas, falhas na numeração, valores atípicos
+- [ ] `saft_compare` -- comparar dois ficheiros SAF-T (ex: mês a mês)
+- [ ] `saft_aging` -- análise de antiguidade de saldos (contas a receber)
+- [ ] Suporte para SAF-T de Contabilidade (lançamentos, razão geral, balancete)
+- [ ] `saft_trial_balance` -- gerar balancete a partir dos dados contabilísticos
+- [ ] `saft_ies_prepare` -- pré-preencher campos da IES (declaração anual)
+- [ ] `saft_cross_check` -- cruzamento entre SAF-T de faturação e contabilidade
+- [ ] Pacote PyPI (`pip install saft-mcp`)
+- [ ] GitHub Actions CI (pytest + ruff + mypy)
 
 ---
 
-## Licenca
+## Versões SAF-T suportadas
+
+- **SAF-T PT 1.04_01** (norma portuguesa atual)
+
+Testado com exportações reais do PHC Corporate. Deve funcionar com ficheiros SAF-T de qualquer software português compatível (Sage, Primavera, PHC, Moloni, InvoiceXpress, etc.).
+
+---
+
+## Licença
 
 MIT
 
 ---
 
-Desenvolvido por [bybloom.ai](https://bybloom.ai), uma unidade de negocio da [Bloomidea](https://bloomidea.com)
+Desenvolvido por [bybloom.ai](https://bybloom.ai), uma unidade de negócio da [Bloomidea](https://bloomidea.com)
